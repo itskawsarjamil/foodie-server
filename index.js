@@ -74,13 +74,16 @@ app.get("/services/:id", async (req, res) => {
 })
 app.get("/reviews/:id", async (req, res) => {
     try {
+        const page = req.query.page;
         const id = req.params.id;
-        const query = { service_id: id };
-        // console.log(query);
+        const filter = { service_id: id };
+        // console.log(filter);
         const options = { title: 1 };
-        const result = await reviewsCollection.find(query, options).toArray();
+        const cursor = reviewsCollection.find(filter, options);
+        const result = await cursor.skip(page * 4).limit(4).toArray();
+        const count = await reviewsCollection.estimatedDocumentCount();
         // console.log(result);
-        res.send(result);
+        res.send({ count, result });
     }
     catch (e) {
         console.log(e);
