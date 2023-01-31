@@ -20,12 +20,39 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-    
-});
+
+async function db() {
+    try {
+        await client.connect();
+        console.log("database connected");
+    }
+    catch (e) {
+        console.log(e);
+    }
+
+}
+
+db().catch(e => { console.log(e) })
+
+const servicesCollection = client.db("Foodie").collection("services");
 
 
-
+app.get("/services", async (req, res) => {
+    try {
+        const query = {};
+        const options = { title: 1 };
+        const result = await servicesCollection.find(query, options).toArray();
+        // console.log(result);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
 
 
 
