@@ -35,6 +35,7 @@ async function db() {
 db().catch(e => { console.log(e) })
 
 const servicesCollection = client.db("Foodie").collection("services");
+const reviewsCollection = client.db("Foodie").collection("reviews");
 
 
 app.get("/services", async (req, res) => {
@@ -53,7 +54,57 @@ app.get("/services", async (req, res) => {
         })
     }
 })
+app.get("/services/:id", async (req, res) => {
+    try {
+        // console.log(req.params.id);
+        const id = req.params.id;
+        const query = { service_id: id };
 
+        const result = await servicesCollection.findOne(query);
+        // console.log(result);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
+app.get("/reviews/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const query = { service_id: id };
+        // console.log(query);
+        const options = { title: 1 };
+        const result = await reviewsCollection.find(query, options).toArray();
+        // console.log(result);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
+
+app.post("/addreview", async (req, res) => {
+    try {
+        const data = req.body;
+        const result = await reviewsCollection.insertOne(data);
+        res.send(data);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
 
 
 app.listen(port, () => {
