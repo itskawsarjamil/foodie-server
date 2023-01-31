@@ -78,11 +78,15 @@ app.get("/reviews/:id", async (req, res) => {
         const id = req.params.id;
         const filter = { service_id: id };
         // console.log(filter);
-        const options = { title: 1 };
+        const options = { title: -1 };
         const cursor = reviewsCollection.find(filter, options);
+        
         const result = await cursor.skip(page * 4).limit(4).toArray();
-        const count = await reviewsCollection.estimatedDocumentCount();
-        // console.log(result);
+
+        const cursorforCount = reviewsCollection.find(filter, options);
+        const a = await cursorforCount.toArray();
+        const count = a.length;
+        // console.log(a.length);
         res.send({ count, result });
     }
     catch (e) {
@@ -109,6 +113,25 @@ app.post("/addreview", async (req, res) => {
     }
 })
 
+app.post("/addservice", async (req, res) => {
+    try {
+        const data = req.body;
+        const count = await servicesCollection.estimatedDocumentCount();
+        const id = count + 1;
+        const finalData = { service_id: id.toString(), ...data };
+        console.log(finalData);
+        const result = await servicesCollection.insertOne(finalData);
+        console.log(result);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
 
 app.listen(port, () => {
     console.log(`server is running on port : ${port}`);
