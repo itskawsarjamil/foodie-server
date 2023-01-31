@@ -141,7 +141,7 @@ app.get("/myreviews", async (req, res) => {
         // console.log(filter);
         const options = { title: -1 };
         const cursor = reviewsCollection.find(filter, options);
-        const result = await cursor.skip(page * 5).limit(5).toArray();
+        const result = await cursor.skip(page * 4).limit(4).toArray();
         // console.log(result);
         const totalCount = await reviewsCollection.find(filter).toArray();
         const count = totalCount.length;
@@ -155,6 +155,31 @@ app.get("/myreviews", async (req, res) => {
         })
     }
 
+})
+
+app.patch("/modifyreview", async (req, res) => {
+    try {
+        const id = req.query.id;
+        // console.log(id);
+        const data = req.body;
+        const find = { _id: ObjectId(id) };
+        // console.log(data);
+        const updatedDoc = {
+            $set: {
+                rating:data.rating,
+                feedback: data.feedback
+            }
+        }
+        const result = await reviewsCollection.updateOne(find, updatedDoc);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
 })
 
 app.delete("/myreviews/:id", async (req, res) => {
