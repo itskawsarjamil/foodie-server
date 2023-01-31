@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 const app = express();
@@ -80,7 +80,7 @@ app.get("/reviews/:id", async (req, res) => {
         // console.log(filter);
         const options = { title: -1 };
         const cursor = reviewsCollection.find(filter, options);
-        
+
         const result = await cursor.skip(page * 4).limit(4).toArray();
 
         const cursorforCount = reviewsCollection.find(filter, options);
@@ -122,6 +122,46 @@ app.post("/addservice", async (req, res) => {
         console.log(finalData);
         const result = await servicesCollection.insertOne(finalData);
         console.log(result);
+        res.send(result);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+})
+
+app.get("/myreviews", async (req, res) => {
+    try {
+        const email = req.query.email;
+        const page = req.query.page;
+        const filter = { userEmail: email };
+        // console.log(filter);
+        const options = { title: -1 };
+        const cursor = reviewsCollection.find(filter, options);
+        const result = await cursor.skip(page * 5).limit(5).toArray();
+        // console.log(result);
+        const totalCount = await reviewsCollection.find(filter).toArray();
+        const count = totalCount.length;
+        res.send({ count, result });
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            success: false,
+            error: e.message,
+        })
+    }
+
+})
+
+app.delete("/myreviews/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const find = { _id: ObjectId(id) };
+        const result = await reviewsCollection.deleteOne(find);
         res.send(result);
     }
     catch (e) {
