@@ -64,7 +64,18 @@ app.get("/services", async (req, res) => {
     try {
         const query = {};
         const options = { title: 1 };
-        const result = await servicesCollection.find(query, options).toArray();
+        const cursor = servicesCollection.find(query, options);
+        let result = [];
+        const l = req.query.count;
+        if (l === "3") {
+            // console.log("found");
+            result = await cursor.limit(3).toArray();
+        }
+        else {
+            result = await cursor.toArray();
+        }
+
+
         // console.log(result);
         res.send(result);
     }
@@ -155,7 +166,7 @@ app.post("/addservice", verifyJWT, async (req, res) => {
     }
 })
 
-app.get("/myreviews",verifyJWT, async (req, res) => {
+app.get("/myreviews", verifyJWT, async (req, res) => {
     try {
         const decoded = req.decoded;
         // console.log(decoded.email, req.query.email);
