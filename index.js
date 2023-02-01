@@ -33,9 +33,6 @@ app.get("/", (req, res) => {
     res.send("foodie server is running");
 })
 
-
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.x8fgjzf.mongodb.net/?retryWrites=true&w=majority`;
 
 
@@ -158,18 +155,18 @@ app.post("/addservice", verifyJWT, async (req, res) => {
     }
 })
 
-app.get("/myreviews", verifyJWT, async (req, res) => {
+app.get("/myreviews",verifyJWT, async (req, res) => {
     try {
         const decoded = req.decoded;
-
+        // console.log(decoded.email, req.query.email);
         if (decoded.email !== req.query.email) {
-           return res.status(403).send({ message: 'unauthorized access' });
+            return res.status(403).send({ message: 'unauthorized access' });
         }
         const email = req.query.email;
         const page = req.query.page;
         const filter = { userEmail: email };
         // console.log(filter);
-        const options = { title: -1 };
+        const options = { title: 1 };
         const cursor = reviewsCollection.find(filter, options);
         const result = await cursor.skip(page * 4).limit(4).toArray();
         // console.log(result);
